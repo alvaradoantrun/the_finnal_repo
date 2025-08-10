@@ -14,16 +14,15 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Build LEFT
-        uses: zmkfirmware/zmk-build@main
+        uses: zmkfirmware/zmk-docker-build@main
         with:
           board: nice_nano_v2
           shield: my_split_left
           archive-name: my_split_left-nice_nano_v2
 
       - name: Build RIGHT
-        uses: zmkfirmware/zmk-build@main
+        uses: zmkfirmware/zmk-docker-build@main
         with:
           board: nice_nano_v2
           shield: my_split_right
           archive-name: my_split_right-nice_nano_v2
-
