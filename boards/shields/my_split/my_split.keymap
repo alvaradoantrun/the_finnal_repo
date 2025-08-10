@@ -1,0 +1,25 @@
+/ {
+    keymap {
+        compatible = "zmk,keymap";
+
+        default_layer {
+            bindings = <
+                /* Left half block (6x7 positions; many are &trans) */
+                &kp Q   &kp W   &kp E   &kp R   &kp T   &kp ESC  &trans
+                &kp A   &kp S   &kp D   &kp F   &kp G   &kp TAB  &trans
+                &kp Z   &kp X   &kp C   &kp V   &kp B   &kp LSFT &trans
+                &kp LCTRL &kp LGUI &kp LALT &kp SPACE &trans &trans &trans
+                &trans  &trans  &trans  &trans  &trans  &trans  &trans
+                &trans  &trans  &trans  &trans  &trans  &trans  &trans
+
+                /* Right half block */
+                &kp Y   &kp U   &kp I   &kp O   &kp P   &kp BSPC &trans
+                &kp H   &kp J   &kp K   &kp L   &kp SEMI &kp QUOT &trans
+                &kp N   &kp M   &kp COMMA &kp DOT &kp SLASH &kp RSFT &trans
+                &trans  &trans  &trans  &kp ENTER &kp RALT &kp RGUI &kp RCTRL
+                &trans  &trans  &trans  &trans    &trans   &trans   &trans
+                &trans  &trans  &trans  &trans    &trans   &trans   &trans
+            >;
+        };
+    };
+};

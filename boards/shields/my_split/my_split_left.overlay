@@ -1,0 +1,32 @@
+/ {
+    chosen { zmk,keyboard = &kb_left; };
+};
+
+&pro_micro {
+    status = "okay";
+};
+
+kb_left: kb_left {
+    compatible = "zmk,keyboard";
+    label = "MY_SPLIT_LEFT";
+    matrix-transform = &mt_left;
+};
+
+&kscan0 {
+    status = "okay";
+    diode-direction = "ROW2COL";
+
+    /* Rows: P0.09, P0.10, P1.11, P1.13, P1.15, P0.02 */
+    row-gpios = <&gpio0 9 0>, <&gpio0 10 0>, <&gpio1 11 0>, <&gpio1 13 0>, <&gpio1 15 0>, <&gpio0 2 0>;
+
+    /* Cols: P1.06, P1.04, P0.11, P1.00, P0.24, P0.22, P0.20 */
+    col-gpios = <&gpio1 6 0>, <&gpio1 4 0>, <&gpio0 11 0>, <&gpio1 0 0>, <&gpio0 24 0>, <&gpio0 22 0>, <&gpio0 20 0>;
+};
+
+mt_left: matrix_transform {
+    compatible = "zmk,matrix-transform";
+    rows = <6>;
+    columns = <7>;
+};
+
+&default_peripheral { status = "okay"; };
