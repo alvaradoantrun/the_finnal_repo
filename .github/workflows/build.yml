@@ -1,45 +1,34 @@
-name: Build ZMK firmware
+- name: Build (Docker Hub image)
+  uses: addnab/docker-run-action@v3
+  with:
+    image: zmkfirmware/zmk-build-arm:stable
+    options: -v ${{ github.workspace }}:/work
+    run: |
+      set -eux
+      cd /work
 
-on:
-  push:
-    branches: [ main ]
-  pull_request:
-  workflow_dispatch:
+      # Use your repo's manifest (west.yml at repo root)
+      west init -l .
+      west update
+      west zephyr-export
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout config repo
-        uses: actions/checkout@v4
+      # Find the actual ZMK app path
+      ZMK_APP_SRC="$(west list -f '{path}' zmk)/app"
+      echo "ZMK app path: $ZMK_APP_SRC"
+      test -d "$ZMK_APP_SRC"
 
-      - name: Build (Docker Hub image)
-        uses: addnab/docker-run-action@v3
-        with:
-          image: zmkfirmware/zmk-build-arm:stable
-          options: -v ${{ github.workspace }}:/work
-          run: |
-            set -eux
-            cd /work
-            # Use the manifest we just added at repo root
-            west init -l .
-            west update
-            west zephyr-export
+      # LEFT
+      west build -s "$ZMK_APP_SRC" -b nice_nano_v2 -- -DSHIELD=my_split_left -DZMK_CONFIG="/work/config"
+      cp build/zephyr/zmk.uf2 my_split_left-nice_nano_v2.uf2
+      rm -rf build
 
-            # LEFT
-            west build -s zmk/app -b nice_nano_v2 -- -DSHIELD=my_split_left -DZMK_CONFIG="/work/config"
-            cp build/zephyr/zmk.uf2 my_split_left-nice_nano_v2.uf2
-            rm -rf build
-
-            # RIGHT
-            west build -s zmk/app -b nice_nano_v2 -- -DSHIELD=my_split_right -DZMK_CONFIG="/work/config"
-            cp build/zephyr/zmk.uf2 my_split_right-nice_nano_v2.uf2
-
-      - name: Upload firmware artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: firmware
-          path: |
-            my_split_left-nice_nano_v2.uf2
-            my_split_right-nice_nano_v2.uf2
-
+      # RIGHT
+      west build -s "$ZMK_APP_SRC" -b nice_nano_v2 -- -DSHIELD=my_split_right -DZMK_CONFIG="/work/config"
+      cp build/zephyr/zmk.uf2 my_split_right-nice_nano_v2.uf2
+- name: Upload firmware artifacts
+  uses: actions/upload-artifact@v4
+  with:
+    name: firmware
+    path: |
+      my_split_left-nice_nano_v2.uf2
+      my_split_right-nice_nano_v2.uf2
