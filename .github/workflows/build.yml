@@ -6,27 +6,14 @@ on:
   pull_request:
   workflow_dispatch:
 
-permissions:
-  contents: read
-  packages: read
-
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout ZMK (upstream)
+      - name: Checkout config repo
         uses: actions/checkout@v4
-        with:
-          repository: zmkfirmware/zmk
-          path: zmk
-          submodules: recursive
 
-      - name: Checkout your config
-        uses: actions/checkout@v4
-        with:
-          path: config
-
-      - name: Build firmware (Docker Hub image)
+      - name: Build (Docker Hub image)
         uses: addnab/docker-run-action@v3
         with:
           image: zmkfirmware/zmk-build-arm:stable
@@ -34,7 +21,8 @@ jobs:
           run: |
             set -eux
             cd /work
-            west init -l config -m zmk/west.yml
+            # Use the manifest we just added at repo root
+            west init -l .
             west update
             west zephyr-export
 
@@ -54,3 +42,4 @@ jobs:
           path: |
             my_split_left-nice_nano_v2.uf2
             my_split_right-nice_nano_v2.uf2
+
