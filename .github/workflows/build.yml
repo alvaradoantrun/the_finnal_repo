@@ -6,23 +6,51 @@ on:
   pull_request:
   workflow_dispatch:
 
+permissions:
+  contents: read
+  packages: read
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout config
+      - name: Checkout ZMK (upstream)
         uses: actions/checkout@v4
-
-      - name: Build LEFT
-        uses: zmkfirmware/zmk-docker-build@main
         with:
-          board: nice_nano_v2
-          shield: my_split_left
-          archive-name: my_split_left-nice_nano_v2
+          repository: zmkfirmware/zmk
+          path: zmk
+          submodules: recursive
 
-      - name: Build RIGHT
-        uses: zmkfirmware/zmk-docker-build@main
+      - name: Checkout your config
+        uses: actions/checkout@v4
         with:
-          board: nice_nano_v2
-          shield: my_split_right
-          archive-name: my_split_right-nice_nano_v2
+          path: config
+
+      - name: Build firmware (Docker Hub image)
+        uses: addnab/docker-run-action@v3
+        with:
+          image: zmkfirmware/zmk-build-arm:stable
+          options: -v ${{ github.workspace }}:/work
+          run: |
+            set -eux
+            cd /work
+            west init -l config
+            west update
+            west zephyr-export
+
+            # LEFT
+            west build -s zmk/app -b nice_nano_v2 -- -DSHIELD=my_split_left -DZMK_CONFIG="/work/config"
+            cp build/zephyr/zmk.uf2 my_split_left-nice_nano_v2.uf2
+            rm -rf build
+
+            # RIGHT
+            west build -s zmk/app -b nice_nano_v2 -- -DSHIELD=my_split_right -DZMK_CONFIG="/work/config"
+            cp build/zephyr/zmk.uf2 my_split_right-nice_nano_v2.uf2
+
+      - name: Upload firmware artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: firmware
+          path: |
+            my_split_left-nice_nano_v2.uf2
+            my_split_right-nice_nano_v2.uf2
