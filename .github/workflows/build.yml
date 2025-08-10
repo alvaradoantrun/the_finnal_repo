@@ -34,7 +34,7 @@ jobs:
           run: |
             set -eux
             cd /work
-            west init -l config
+            west init -l config -m zmk/west.yml
             west update
             west zephyr-export
 
